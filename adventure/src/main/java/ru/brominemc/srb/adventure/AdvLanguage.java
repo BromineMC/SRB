@@ -149,7 +149,7 @@ public class AdvLanguage extends Language {
      * @param key      Localization key
      * @return Localized text components, singleton {@code key} text component if not found
      * @throws IllegalArgumentException If the language of that receiver is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
-     * @throws NullPointerException     If receiver is null and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @see #ofReceiver(Object)
      * @see #components(String)
      */
@@ -171,7 +171,7 @@ public class AdvLanguage extends Language {
      * @param key      Localization key
      * @return Localized text component, {@code key} text component if not found
      * @throws IllegalArgumentException If the language of that receiver is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
-     * @throws NullPointerException     If receiver is null and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
      * @see #ofReceiver(Object)
      * @see #component(String)

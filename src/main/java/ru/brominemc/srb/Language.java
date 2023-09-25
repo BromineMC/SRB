@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
@@ -212,7 +211,7 @@ public class Language {
     /**
      * Formats the date-time into short human-readable format.
      *
-     * @param temporal Target datetime
+     * @param temporal Target dat-etime
      * @return Formatted date-time
      */
     @Contract(value = "_ -> new", pure = true)
@@ -224,12 +223,12 @@ public class Language {
     /**
      * Formats the date-time into precise human-readable format.
      *
-     * @param temporal Target datetime
+     * @param temporal Target date-time
      * @return Formatted date-time
      */
     @Contract(value = "_ -> new", pure = true)
     @NotNull
-    public final String fullDateTime(@NotNull ZonedDateTime temporal) {
+    public final String fullDateTime(@NotNull TemporalAccessor temporal) {
         return fullDateTime.format(temporal);
     }
 
@@ -240,7 +239,6 @@ public class Language {
      * @param precise  Should millis be always shown
      * @return Formatted duration
      */
-    @Contract("_, _ -> new")
     @CheckReturnValue
     @NotNull
     public String duration(@NotNull Duration duration, boolean precise) {
@@ -304,9 +302,9 @@ public class Language {
      * Gets the language via {@link SRBPlatform#of(Object)}, falling back to default language if not found or receiver not supported.
      *
      * @param receiver Target receiver
-     * @return Language by ID, {@link #ofDefault()} if language not found or receiver not supported
+     * @return Language from receiver, {@link #ofDefault()} if language not found or receiver not supported
      * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
-     * @throws NullPointerException     If receiver is null and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @see SRBPlatform#of(Object)
      * @see #ofId(String)
      */
@@ -356,9 +354,54 @@ public class Language {
      */
     @CheckReturnValue
     @NotNull
-    @Unmodifiable
     public static String lineOfId(@Nullable String id, @NotNull String key) {
         return ofId(id).line(key);
+    }
+
+    /**
+     * Formats the date-time into short human-readable format via {@link #ofId(String)} language.
+     *
+     * @param id       Target language ID
+     * @param temporal Target date-time
+     * @return Formatted date-time
+     * @see #ofId(String)
+     * @see #shortDateTime(TemporalAccessor)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String shortDateTimeOfId(@Nullable String id, @NotNull TemporalAccessor temporal) {
+        return ofId(id).shortDateTime(temporal);
+    }
+
+    /**
+     * Formats the date-time into precise human-readable format via {@link #ofId(String)} language.
+     *
+     * @param id       Target language ID
+     * @param temporal Target date-time
+     * @return Formatted date-time
+     * @see #ofId(String)
+     * @see #fullDateTime(TemporalAccessor)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String fullDateTimeOfId(@Nullable String id, @NotNull TemporalAccessor temporal) {
+        return ofId(id).fullDateTime(temporal);
+    }
+
+    /**
+     * Formats the duration into human-readable format via {@link #ofId(String)} language.
+     *
+     * @param id       Target language ID
+     * @param duration Target duration
+     * @param precise  Should millis be always shown
+     * @return Formatted duration
+     * @see #ofId(String)
+     * @see #duration(Duration, boolean)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String durationOfId(@NotNull String id, @NotNull Duration duration, boolean precise) {
+        return ofId(id).duration(duration, precise);
     }
 
     /**
@@ -368,7 +411,7 @@ public class Language {
      * @param key      Localization key
      * @return Localized string lines, singleton {@code key} if not found
      * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
-     * @throws NullPointerException     If receiver is null and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @see #ofReceiver(Object)
      * @see #lines(String)
      */
@@ -386,16 +429,67 @@ public class Language {
      * @param key      Localization key
      * @return Localized string, {@code key} if not found
      * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
-     * @throws NullPointerException     If receiver is null and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @apiNote This method will join lines with LF ({@code \n}) if multiple are found
      * @see #ofReceiver(Object)
      * @see #line(String)
      */
     @CheckReturnValue
     @NotNull
-    @Unmodifiable
     public static String lineOfReceiver(@Nullable Object receiver, @NotNull String key) {
         return ofReceiver(receiver).line(key);
+    }
+
+    /**
+     * Formats the date-time into short human-readable format via {@link #ofReceiver(Object)} language.
+     *
+     * @param receiver Target receiver
+     * @param temporal Target date-time
+     * @return Formatted date-time
+     * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
+     * @see #ofReceiver(Object)
+     * @see #shortDateTime(TemporalAccessor)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String shortDateTimeOfReceiver(@Nullable Object receiver, @NotNull TemporalAccessor temporal) {
+        return ofReceiver(receiver).shortDateTime(temporal);
+    }
+
+    /**
+     * Formats the date-time into precise human-readable format via {@link #ofReceiver(Object)} language.
+     *
+     * @param receiver Target receiver
+     * @param temporal Target date-time
+     * @return Formatted date-time
+     * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
+     * @see #ofReceiver(Object)
+     * @see #fullDateTime(TemporalAccessor)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String fullDateTimeOfReceiver(@Nullable Object receiver, @NotNull TemporalAccessor temporal) {
+        return ofReceiver(receiver).fullDateTime(temporal);
+    }
+
+    /**
+     * Formats the duration into human-readable format via {@link #ofReceiver(Object)} language.
+     *
+     * @param receiver Target receiver
+     * @param duration Target duration
+     * @param precise  Should millis be always shown
+     * @return Formatted duration
+     * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
+     * @see #ofReceiver(Object)
+     * @see #duration(Duration, boolean)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String durationOfReceiver(@Nullable Object receiver, @NotNull Duration duration, boolean precise) {
+        return ofReceiver(receiver).duration(duration, precise);
     }
 
     /**
@@ -424,8 +518,50 @@ public class Language {
      */
     @CheckReturnValue
     @NotNull
-    @Unmodifiable
     public static String lineOfDefault(@NotNull String key) {
         return ofDefault().line(key);
+    }
+
+    /**
+     * Formats the date-time into short human-readable format via {@link #ofDefault()} language.
+     *
+     * @param temporal Target date-time
+     * @return Formatted date-time
+     * @see #ofDefault()
+     * @see #shortDateTime(TemporalAccessor)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String shortDateTimeOfDefault(@NotNull TemporalAccessor temporal) {
+        return ofDefault().shortDateTime(temporal);
+    }
+
+    /**
+     * Formats the date-time into precise human-readable format via {@link #ofDefault()} language.
+     *
+     * @param temporal Target date-time
+     * @return Formatted date-time
+     * @see #ofDefault()
+     * @see #fullDateTime(TemporalAccessor)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String fullDateTimeOfDefault(@NotNull TemporalAccessor temporal) {
+        return ofDefault().fullDateTime(temporal);
+    }
+
+    /**
+     * Formats the duration into human-readable format via {@link #ofDefault()} language.
+     *
+     * @param duration Target duration
+     * @param precise  Should millis be always shown
+     * @return Formatted duration
+     * @see #ofDefault()
+     * @see #duration(Duration, boolean)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static String durationOfDefault(@NotNull Duration duration, boolean precise) {
+        return ofDefault().duration(duration, precise);
     }
 }
