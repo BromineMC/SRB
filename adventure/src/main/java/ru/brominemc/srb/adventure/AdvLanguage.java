@@ -23,10 +23,12 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import ru.brominemc.srb.Language;
 import ru.brominemc.srb.SRB;
+import ru.brominemc.srb.SRBPlatform;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -117,71 +119,109 @@ public class AdvLanguage extends Language {
     }
 
     /**
-     * Gets localized components from {@link #ofId(String)} language.
+     * Gets the language by its ID via {@link SRBPlatform#language(String)}, falling back to default language if not found.
+     *
+     * @param id Target ID
+     * @return Language by ID, {@link #ofDefaultAdv()} if {@code id} is null or language not found
+     * @see SRBPlatform#language(String)
+     * @see #ofDefaultAdv()
+     */
+    @CheckReturnValue
+    @NotNull
+    public static AdvLanguage ofIdAdv(@Nullable String id) {
+        if (id == null) return ofDefaultAdv();
+        Language lang = Objects.requireNonNullElseGet(SRB.platform().language(id), Language::ofDefault);
+        if (lang instanceof AdvLanguage advLang) return advLang;
+        throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
+    }
+
+    /**
+     * Gets the language via {@link SRBPlatform#of(Object)}, falling back to default language if not found or receiver not supported.
+     *
+     * @param receiver Target receiver
+     * @return Language from receiver, {@link #ofDefaultAdv()} if language not found or receiver not supported
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
+     * @see SRBPlatform#of(Object)
+     * @see #ofIdAdv(String)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static AdvLanguage ofReceiverAdv(@Nullable Object receiver) {
+        Language lang = Objects.requireNonNullElseGet(SRB.platform().of(receiver), Language::ofDefault);
+        if (lang instanceof AdvLanguage advLang) return advLang;
+        throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
+    }
+
+    /**
+     * Gets the {@link SRBPlatform#defaultLanguage()}.
+     *
+     * @return Default language
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage}
+     * @see SRBPlatform#defaultLanguage()
+     */
+    @CheckReturnValue
+    @NotNull
+    public static AdvLanguage ofDefaultAdv() {
+        Language lang = SRB.platform().defaultLanguage();
+        if (lang instanceof AdvLanguage advLang) return advLang;
+        throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
+    }
+
+    /**
+     * Gets localized components from {@link #ofIdAdv(String)} language.
      *
      * @param id  Target language ID
      * @param key Localization key
      * @return Localized text components, singleton {@code key} text component if not found
      * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage}
-     * @see #ofId(String)
+     * @see #ofIdAdv(String)
      * @see #components(String)
      */
     @CheckReturnValue
     @NotNull
     @Unmodifiable
     public static List<Component> componentsOfId(@Nullable String id, @NotNull String key) {
-        Language lang = ofId(id);
-        if (!(lang instanceof AdvLanguage advLang)) {
-            throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
-        }
-        return advLang.components(key);
+        return ofIdAdv(id).components(key);
     }
 
     /**
-     * Gets a localized text component from {@link #ofId(String)} language.
+     * Gets a localized text component from {@link #ofIdAdv(String)} language.
      *
      * @param id  Target language ID
      * @param key Localization key
      * @return Localized text component, {@code key} text component if not found
      * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
-     * @see #ofId(String)
+     * @see #ofIdAdv(String)
      * @see #component(String)
      */
     @CheckReturnValue
     @NotNull
     public static Component componentOfId(@Nullable String id, @NotNull String key) {
-        Language lang = ofId(id);
-        if (!(lang instanceof AdvLanguage advLang)) {
-            throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
-        }
-        return advLang.component(key);
+        return ofIdAdv(id).component(key);
     }
 
     /**
-     * Gets localized components from {@link #ofReceiver(Object)} language.
+     * Gets localized components from {@link #ofReceiverAdv(Object)} language.
      *
      * @param receiver Target receiver
      * @param key      Localization key
      * @return Localized text components, singleton {@code key} text component if not found
      * @throws IllegalArgumentException If the language of that receiver is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
      * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
-     * @see #ofReceiver(Object)
+     * @see #ofReceiverAdv(Object)
      * @see #components(String)
      */
     @CheckReturnValue
     @NotNull
     @Unmodifiable
     public static List<Component> componentsOfReceiver(@Nullable Object receiver, @NotNull String key) {
-        Language lang = ofReceiver(receiver);
-        if (!(lang instanceof AdvLanguage advLang)) {
-            throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
-        }
-        return advLang.components(key);
+        return ofReceiverAdv(receiver).components(key);
     }
 
     /**
-     * Gets a localized text component from {@link #ofReceiver(Object)} language.
+     * Gets a localized text component from {@link #ofReceiverAdv(Object)} language.
      *
      * @param receiver Target receiver
      * @param key      Localization key
@@ -189,57 +229,45 @@ public class AdvLanguage extends Language {
      * @throws IllegalArgumentException If the language of that receiver is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
      * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
-     * @see #ofReceiver(Object)
+     * @see #ofReceiverAdv(Object)
      * @see #component(String)
      */
     @CheckReturnValue
     @NotNull
     public static Component componentOfReceiver(@Nullable Object receiver, @NotNull String key) {
-        Language lang = ofReceiver(receiver);
-        if (!(lang instanceof AdvLanguage advLang)) {
-            throw new IllegalArgumentException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
-        }
-        return advLang.component(key);
+        return ofReceiverAdv(receiver).component(key);
     }
 
     /**
-     * Gets localized components from {@link #ofDefault()} language.
+     * Gets localized components from {@link #ofDefaultAdv()} language.
      *
      * @param key Localization key
      * @return Localized text components, singleton {@code key} text component if not found
      * @throws IllegalStateException If the default language is not an instance of {@link AdvLanguage}
-     * @see #ofDefault()
+     * @see #ofDefaultAdv()
      * @see #components(String)
      */
     @CheckReturnValue
     @NotNull
     @Unmodifiable
     public static List<Component> componentsOfDefault(@NotNull String key) {
-        Language lang = ofDefault();
-        if (!(lang instanceof AdvLanguage advLang)) {
-            throw new IllegalStateException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
-        }
-        return advLang.components(key);
+        return ofDefaultAdv().components(key);
     }
 
     /**
-     * Gets a localized text component from {@link #ofDefault()} language.
+     * Gets a localized text component from {@link #ofDefaultAdv()} language.
      *
      * @param key Localization key
      * @return Localized text component, {@code key} text component if not found
      * @throws IllegalStateException If the default language is not an instance of {@link AdvLanguage}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
-     * @see #ofId(String)
+     * @see #ofIdAdv(String)
      * @see #component(String)
      */
     @CheckReturnValue
     @NotNull
     public static Component componentOfDefault(@NotNull String key) {
-        Language lang = ofDefault();
-        if (!(lang instanceof AdvLanguage advLang)) {
-            throw new IllegalStateException("Target language is not AdventureLanguage (" + lang.getClass() + "): " + lang);
-        }
-        return advLang.component(key);
+        return ofDefaultAdv().component(key);
     }
 
     /**
