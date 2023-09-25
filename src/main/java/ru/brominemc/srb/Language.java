@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +53,7 @@ public class Language {
     // Caches
     protected final Map<String, List<String>> linesCache;
     protected final Map<String, String> lineCache;
+    protected final Map<Object, Object> customCache = new ConcurrentHashMap<>();
 
     /**
      * Creates a new language.
@@ -288,6 +290,22 @@ public class Language {
     }
 
     /**
+     * Gets the custom cached object for this language.
+     *
+     * @param key    Target key
+     * @param loader Loader for missing value
+     * @param <T>    Type of stored value
+     * @return Cached value, will be cached from {@code loader} if absent
+     */
+    @CheckReturnValue
+    @NotNull
+    public <T> T custom(@Nullable Object key, @NotNull Supplier<T> loader) {
+        @SuppressWarnings("unchecked")
+        T value = (T) customCache.computeIfAbsent(key, k -> loader.get());
+        return value;
+    }
+
+    /**
      * Tries to pre-fill all caches.
      *
      * @apiNote You are not required to call this method, though calling it might improve performance of {@link #line(String)} and {@link #lines(String)}
@@ -421,6 +439,23 @@ public class Language {
     }
 
     /**
+     * Gets the custom cached object for {@link #ofId(String)} language.
+     *
+     * @param id     Target language ID
+     * @param key    Target key
+     * @param loader Loader for missing value
+     * @param <T>    Type of stored value
+     * @return Cached value, will be cached from {@code loader} if absent
+     * @see #ofId(String)
+     * @see #custom(Object, Supplier)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static <T> T customOfId(@NotNull String id, @Nullable Object key, @NotNull Supplier<T> loader) {
+        return ofId(id).custom(key, loader);
+    }
+
+    /**
      * Gets localized string lines from {@link #ofReceiver(Object)} language.
      *
      * @param receiver Target receiver
@@ -509,6 +544,25 @@ public class Language {
     }
 
     /**
+     * Gets the custom cached object for {@link #ofReceiver(Object)} language.
+     *
+     * @param receiver Target receiver
+     * @param key      Target key
+     * @param loader   Loader for missing value
+     * @param <T>      Type of stored value
+     * @return Cached value, will be cached from {@code loader} if absent
+     * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
+     * @see #ofReceiver(Object)
+     * @see #custom(Object, Supplier)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static <T> T customOfReceiver(@Nullable Object receiver, @Nullable Object key, @NotNull Supplier<T> loader) {
+        return ofReceiver(receiver).custom(key, loader);
+    }
+
+    /**
      * Gets localized string lines from {@link #ofDefault()} language.
      *
      * @param key Localization key
@@ -579,5 +633,23 @@ public class Language {
     @NotNull
     public static String durationOfDefault(@NotNull Duration duration, boolean precise) {
         return ofDefault().duration(duration, precise);
+    }
+
+    /**
+     * Gets the custom cached object for {@link #ofDefault()} language.
+     *
+     * @param key    Target key
+     * @param loader Loader for missing value
+     * @param <T>    Type of stored value
+     * @return Cached value, will be cached from {@code loader} if absent
+     * @throws IllegalArgumentException If receiver is not supported and the platform chose not to return {@code null}
+     * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
+     * @see #ofDefault()
+     * @see #custom(Object, Supplier)
+     */
+    @CheckReturnValue
+    @NotNull
+    public static <T> T customOfDefault(@Nullable Object key, @NotNull Supplier<T> loader) {
+        return ofDefault().custom(key, loader);
     }
 }
