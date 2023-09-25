@@ -50,7 +50,7 @@ public final class LanguageChecker {
      */
     @Contract(pure = true)
     @NotNull
-    public static List<CheckResult> checkSingle(@NotNull Language base, @NotNull Collection<Language> compares) {
+    public static List<CheckResult> checkMulti(@NotNull Language base, @NotNull Collection<Language> compares) {
         List<CheckResult> results = new ArrayList<>(compares.size());
         for (Language compare : compares) {
             results.add(checkSingle(base, compare));
