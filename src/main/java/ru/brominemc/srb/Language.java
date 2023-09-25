@@ -198,8 +198,7 @@ public class Language {
         return linesCache.computeIfAbsent(key, k -> {
             List<String> lines = data.get(key);
             if (lines == null || lines.isEmpty()) {
-                SRB.platform().logger().log(System.Logger.Level.WARNING, "Unable to get key from lang %s: %s", id, key);
-                return List.of(key.intern());
+                return SRB.platform().missingKey(this, key).stream().map(String::intern).toList();
             }
             return lines;
         });
@@ -219,8 +218,7 @@ public class Language {
         return lineCache.computeIfAbsent(key, k -> {
             List<String> lines = data.get(key);
             if (lines == null || lines.isEmpty()) {
-                SRB.platform().logger().log(System.Logger.Level.WARNING, "Unable to get key from lang %s: %s", id, key);
-                return key.intern();
+                return String.join("\n", SRB.platform().missingKey(this, key).stream().map(String::intern).toList()).intern();
             }
             return String.join("\n", lines).intern();
         });

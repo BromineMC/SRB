@@ -20,6 +20,8 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * Platform for handling SRB.
  *
@@ -29,14 +31,21 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface SRBPlatform {
     /**
-     * Gets the logger for the SRB.
+     * Resolves the missing key.
+     * <p>
+     * The {@link Language} class will cache returned value, so this method will be called
+     * for the same key at most a few times.
+     * <p>
+     * The platform is free to log any missing keys or even perform any heavy operation as long
+     * as it acknowledges the fact that this method will block most {@link Language} methods.
      *
-     * @return Logger
-     * @implNote Currently used for logging missing keys
+     * @param language Target language
+     * @param key      Target key
+     * @return Non-null and non-empty list, should contain the replacement for missing lines
      */
     @CheckReturnValue
     @NotNull
-    System.Logger logger();
+    List<String> missingKey(@NotNull Language language, @NotNull String key);
 
     /**
      * Gets the default platform language.

@@ -77,8 +77,9 @@ public class AdvLanguage extends Language {
         return componentsCache.computeIfAbsent(key, k -> {
             List<String> lines = data.get(key);
             if (lines == null || lines.isEmpty()) {
-                SRB.platform().logger().log(System.Logger.Level.WARNING, "Unable to get key from lang %s: %s", id, key);
-                return List.of(Component.text(key.intern()));
+                return SRB.platform().missingKey(this, key).stream()
+                        .map(line -> (Component) Component.text(line.intern()))
+                        .toList();
             }
             return lines.stream().map(line -> (Component) Component.text(line)).toList();
         });
@@ -97,8 +98,7 @@ public class AdvLanguage extends Language {
         return componentCache.computeIfAbsent(key, k -> {
             List<String> lines = data.get(key);
             if (lines == null || lines.isEmpty()) {
-                SRB.platform().logger().log(System.Logger.Level.WARNING, "Unable to get key from lang %s: %s", id, key);
-                return Component.text(key.intern());
+                return Component.text(String.join("\n", SRB.platform().missingKey(this, key).stream().map(String::intern).toList()).intern());
             }
             return Component.text(String.join("\n", lines).intern());
         });
