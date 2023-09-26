@@ -2,7 +2,7 @@
 
 The localization/translation library for BromineMC.
 
-![](https://api.brominemc.ru/maven/releases/ru/brominemc/srb/srb-core/maven-metadata.xml)
+![](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fapi.brominemc.ru%2Fmaven%2Freleases%2Fru%2Fbrominemc%2Fsrb%2Fsrb-core%2Fmaven-metadata.xml)
 
 ## Usage
 
