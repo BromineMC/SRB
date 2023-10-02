@@ -18,6 +18,7 @@ package ru.brominemc.srb;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -56,10 +57,10 @@ public final class SRB {
     /**
      * Sets the SRB platform.
      *
-     * @param platform New SRB platform
+     * @param platform New SRB platform, {@code null} to unload the platform
      * @see #platform()
      */
-    public static void platform(@NotNull SRBPlatform platform) {
+    public static void platform(@Nullable SRBPlatform platform) {
         SRB.platform = platform;
     }
 }
