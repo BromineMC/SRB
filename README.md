@@ -8,8 +8,6 @@ The localization/translation library for BromineMC.
 
 **This project is NOT intended for public use.** (i.e. it's open sourced internals)
 
-Maven downloads will be available later.
-
 This project is using Maven Dependency System:
 
 - Maven repository: https://api.brominemc.ru/maven/releases
