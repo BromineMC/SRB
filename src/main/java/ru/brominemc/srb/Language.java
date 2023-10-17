@@ -80,8 +80,7 @@ public class Language {
         this.authors = authors.stream().map(String::intern).toList(); // Copy and intern authors (ensures immutability and null-safety)
 
         // Deep copy data (ensures immutability and null-safety, including that of nested lists)
-        int capacity = (int) Math.ceil(data.size() / 0.75d);
-        HashMap<String, List<String>> newData = new HashMap<>(capacity);
+        HashMap<String, List<String>> newData = HashMap.newHashMap(data.size());
         for (Map.Entry<String, List<String>> entry : data.entrySet()) {
             String key = entry.getKey();
             List<String> value = entry.getValue();
@@ -102,6 +101,7 @@ public class Language {
         this.data = Map.copyOf(newData);
 
         // Create caches
+        int capacity = (int) Math.ceil(data.size() / 0.75d);
         this.linesCache = new ConcurrentHashMap<>(capacity);
         this.lineCache = new ConcurrentHashMap<>(capacity);
     }

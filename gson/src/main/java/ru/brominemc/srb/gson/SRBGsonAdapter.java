@@ -49,8 +49,7 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         String id = getString(json, "id");
         String name = getString(json, "name");
         JsonArray array = getArray(json, "ids");
-        int capacity = (int) Math.ceil(array.size() / 0.75d);
-        Set<String> ids = new HashSet<>(capacity);
+        Set<String> ids = HashSet.newHashSet(array.size());
         for (JsonElement entry : array) {
             String idsId;
             try {
@@ -72,8 +71,7 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
             authors.add(author);
         }
         JsonObject dataObject = getObject(json, "data");
-        capacity = (int) Math.ceil(dataObject.size() / 0.75d);
-        Map<String, List<String>> data = new HashMap<>(capacity);
+        Map<String, List<String>> data = HashMap.newHashMap(dataObject.size());
         for (Map.Entry<String, JsonElement> entry : dataObject.entrySet()) {
             String key = entry.getKey();
             JsonElement value = entry.getValue();
