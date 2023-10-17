@@ -17,6 +17,7 @@
 package ru.brominemc.srb;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -308,11 +309,43 @@ public class Language {
      *
      * @apiNote You are not required to call this method, though calling it might improve performance of {@link #line(String)} and {@link #lines(String)}
      */
+    @OverridingMethodsMustInvokeSuper
     public void preCache() {
         for (String key : data.keySet()) {
             List<String> ignoredLines = lines(key);
             String ignoredLine = line(key);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Language language = (Language) obj;
+        return id.equals(language.id) && name.equals(language.name) && ids.equals(language.ids) &&
+                authors.equals(language.authors) && shortDateTime.equals(language.shortDateTime) &&
+                fullDateTime.equals(language.fullDateTime) && data.equals(language.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, ids, authors, data, shortDateTime, fullDateTime);
+    }
+
+    @Override
+    public String toString() {
+        return "Language{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", ids=" + ids +
+                ", authors=" + authors +
+                ", data=" + data +
+                ", shortDateTime=" + shortDateTime +
+                ", fullDateTime=" + fullDateTime +
+                ", linesCache=" + linesCache +
+                ", lineCache=" + lineCache +
+                ", customCache=" + customCache +
+                '}';
     }
 
     /**

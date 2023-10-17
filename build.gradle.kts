@@ -1,6 +1,9 @@
+import java.time.Instant
+
 plugins {
     id("java-library")
     id("maven-publish")
+    id("org.ajoberstar.grgit") version "5.2.0"
 }
 
 group = "ru.brominemc.srb.core"
@@ -18,6 +21,19 @@ dependencies {
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     options.release.set(17)
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes(
+                "Specification-Title" to "SRB",
+                "Specification-Version" to project.version,
+                "Specification-Vendor" to "BromineMC",
+                "Implementation-Title" to "SpeakRussianBl**t",
+                "Implementation-Version" to "git-${grgit.branch.current().name}-${grgit.head().abbreviatedId}-${Instant.now()}",
+                "Implementation-Vendor" to project.properties["contributors"]
+        )
+    }
 }
 
 java {
