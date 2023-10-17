@@ -118,6 +118,39 @@ public class AdvLanguage extends Language {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        AdvLanguage language = (AdvLanguage) obj;
+        return id.equals(language.id) && name.equals(language.name) && ids.equals(language.ids) &&
+                authors.equals(language.authors) && shortDateTime.equals(language.shortDateTime) &&
+                fullDateTime.equals(language.fullDateTime) && data.equals(language.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, ids, authors, data, shortDateTime, fullDateTime, true);
+    }
+
+    @Override
+    public String toString() {
+        return "AdvLanguage{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", ids=" + ids +
+                ", authors=" + authors +
+                ", data=" + data +
+                ", shortDateTime=" + shortDateTime +
+                ", fullDateTime=" + fullDateTime +
+                ", linesCache=" + linesCache +
+                ", lineCache=" + lineCache +
+                ", customCache=" + customCache +
+                ", componentsCache=" + componentsCache +
+                ", componentCache=" + componentCache +
+                '}';
+    }
+
     /**
      * Gets the language by its ID via {@link SRBPlatform#language(String)}, falling back to default language if not found.
      *
