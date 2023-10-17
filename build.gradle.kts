@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "ru.brominemc.srb.core"
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 
 repositories {
     mavenCentral()
@@ -20,7 +20,7 @@ dependencies {
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
-    options.release.set(17)
+    options.release.set(21)
 }
 
 tasks.withType<Jar> {
