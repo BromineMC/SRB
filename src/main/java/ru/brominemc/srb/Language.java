@@ -17,6 +17,7 @@
 package ru.brominemc.srb;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -308,6 +309,7 @@ public class Language {
      *
      * @apiNote You are not required to call this method, though calling it might improve performance of {@link #line(String)} and {@link #lines(String)}
      */
+    @OverridingMethodsMustInvokeSuper
     public void preCache() {
         for (String key : data.keySet()) {
             List<String> ignoredLines = lines(key);
