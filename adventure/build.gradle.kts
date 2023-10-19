@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.1")
-    compileOnly("com.google.errorprone:error_prone_annotations:2.22.0")
+    compileOnly("com.google.errorprone:error_prone_annotations:2.23.0")
     api(project(":"))
     api("net.kyori:adventure-api:4.14.0")
 }
