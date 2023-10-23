@@ -3,7 +3,7 @@ import java.time.Instant
 plugins {
     id("java-library")
     id("maven-publish")
-    id("org.ajoberstar.grgit") version "5.2.0"
+    id("org.ajoberstar.grgit") version "5.2.1"
 }
 
 group = "ru.brominemc.srb.core"
