@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.jetbrains:annotations:24.1.0")
-    compileOnly("com.google.errorprone:error_prone_annotations:2.23.0")
+    compileOnlyApi("org.jetbrains:annotations:24.1.0")
+    compileOnlyApi("com.google.errorprone:error_prone_annotations:2.23.0")
     api(project(":"))
     api("net.kyori:adventure-api:4.14.0")
 }
