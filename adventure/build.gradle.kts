@@ -14,7 +14,7 @@ dependencies {
     compileOnlyApi("org.jetbrains:annotations:24.1.0")
     compileOnlyApi("com.google.errorprone:error_prone_annotations:2.23.0")
     api(project(":"))
-    api("net.kyori:adventure-api:4.14.0")
+    api("net.kyori:adventure-api:4.15.0")
 }
 
 tasks.withType<JavaCompile> {
