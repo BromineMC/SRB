@@ -6,8 +6,10 @@ plugins {
     id("org.ajoberstar.grgit") version "5.2.1"
 }
 
+java.sourceCompatibility = JavaVersion.VERSION_21
+java.targetCompatibility = JavaVersion.VERSION_21
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 group = "ru.brominemc.srb.core"
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 
 repositories {
     mavenCentral()

@@ -1,5 +1,3 @@
-==== SRB ====
-
 Copyright 2023 BromineMC
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,25 +11,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
-================================================================================================
-
-This software uses 'java-annotations' licensed under 'Apache License 2.0':
-- Page: https://github.com/JetBrains/java-annotations
-- License Page: https://github.com/JetBrains/java-annotations/blob/master/LICENSE.txt
-- License File: legal/LICENSE_java-annotations
-
-This software uses 'error-prone' licensed under 'Apache License 2.0':
-- Page: https://github.com/google/error-prone
-- License Page: https://github.com/google/error-prone/blob/master/COPYING
-- License File: legal/COPYING_error-prone
-
-This software uses 'adventure' licensed under 'MIT License':
-- Page: https://github.com/KyoriPowered/adventure
-- License Page: https://github.com/KyoriPowered/adventure/blob/main/4/license.txt
-- License File: legal/license_txt_adventure
-
-This software uses 'gson' licensed under 'Apache License 2.0':
-- Page: https://github.com/google/gson
-- License Page: https://github.com/google/gson/blob/main/LICENSE
-- License File: legal/LICENSE_gson

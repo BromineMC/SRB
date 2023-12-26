@@ -18,6 +18,7 @@ package ru.brominemc.srb.adventure;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -38,8 +39,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author VidTu
  */
 public class AdvLanguage extends Language {
-    // Caches
+    /**
+     * Cache for lists of components.
+     */
     protected final Map<String, List<Component>> componentsCache;
+
+    /**
+     * Cache for single components.
+     */
     protected final Map<String, Component> componentCache;
 
     /**
@@ -58,7 +65,7 @@ public class AdvLanguage extends Language {
                        @NotNull DateTimeFormatter shortDateTime, @NotNull DateTimeFormatter fullDateTime) {
         super(id, name, ids, authors, data, shortDateTime, fullDateTime);
 
-        // Create caches
+        // Create caches.
         int capacity = (int) Math.ceil(data.size() / 0.75d);
         this.componentsCache = new ConcurrentHashMap<>(capacity);
         this.componentCache = new ConcurrentHashMap<>(capacity);
@@ -74,14 +81,19 @@ public class AdvLanguage extends Language {
     @NotNull
     @Unmodifiable
     public final List<Component> components(@NotNull String key) {
-        return componentsCache.computeIfAbsent(key, k -> {
-            List<String> lines = data.get(key);
+        return this.componentsCache.computeIfAbsent(key, k -> {
+            // Extract the lines.
+            List<String> lines = this.data.get(key);
+
+            // Flush no lines.
             if (lines == null || lines.isEmpty()) {
-                return SRB.platform().missingKey(this, key).stream()
-                        .map(line -> (Component) Component.text(line.intern()))
-                        .toList();
+                return List.copyOf(SRB.platform().missingKey(this, key).stream()
+                        .map(line -> Component.text(line.intern()).compact())
+                        .toList());
             }
-            return lines.stream().map(line -> (Component) Component.text(line)).toList();
+
+            // Flush to cache.
+            return lines.stream().map(line -> Component.text(line).compact()).toList();
         });
     }
 
@@ -95,12 +107,20 @@ public class AdvLanguage extends Language {
     @CheckReturnValue
     @NotNull
     public final Component component(@NotNull String key) {
-        return componentCache.computeIfAbsent(key, k -> {
-            List<String> lines = data.get(key);
+        return this.componentCache.computeIfAbsent(key, k -> {
+            // Extract the lines.
+            List<String> lines = this.data.get(key);
+
+            // Flush no lines.
             if (lines == null || lines.isEmpty()) {
-                return Component.text(String.join("\n", SRB.platform().missingKey(this, key).stream().map(String::intern).toList()).intern());
+                return Component.text(String.join("\n", SRB.platform().missingKey(this, key).stream()
+                                .map(String::intern)
+                                .toList()).intern())
+                        .compact();
             }
-            return Component.text(String.join("\n", lines).intern());
+
+            // Flush to cache.
+            return Component.text(String.join("\n", lines).intern()).compact();
         });
     }
 
@@ -111,43 +131,51 @@ public class AdvLanguage extends Language {
      */
     @Override
     public void preCache() {
+        // Call super.
         super.preCache();
-        for (String key : data.keySet()) {
-            List<Component> ignoredComponents = components(key);
-            Component ignoredComponent = component(key);
+
+        // Iterate over every key.
+        for (String key : this.data.keySet()) {
+            // Get the components and single components.
+            List<Component> ignoredComponents = this.components(key);
+            Component ignoredComponent = this.component(key);
         }
     }
 
+    @Contract(value = "null -> false", pure = true)
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (obj == null || this.getClass() != obj.getClass()) return false;
         AdvLanguage language = (AdvLanguage) obj;
-        return id.equals(language.id) && name.equals(language.name) && ids.equals(language.ids) &&
-                authors.equals(language.authors) && shortDateTime.equals(language.shortDateTime) &&
-                fullDateTime.equals(language.fullDateTime) && data.equals(language.data);
+        return this.id.equals(language.id) && this.name.equals(language.name) && this.ids.equals(language.ids) &&
+                this.authors.equals(language.authors) && this.shortDateTime.equals(language.shortDateTime) &&
+                this.fullDateTime.equals(language.fullDateTime) && this.data.equals(language.data);
     }
 
+    @Contract(pure = true)
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, ids, authors, data, shortDateTime, fullDateTime, true);
+        return Objects.hash(this.id, this.name, this.ids, this.authors, this.data, this.shortDateTime, this.fullDateTime, true);
     }
 
+    @Contract(pure = true)
     @Override
+    @NotNull
     public String toString() {
         return "AdvLanguage{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", ids=" + ids +
-                ", authors=" + authors +
-                ", data=" + data +
-                ", shortDateTime=" + shortDateTime +
-                ", fullDateTime=" + fullDateTime +
-                ", linesCache=" + linesCache +
-                ", lineCache=" + lineCache +
-                ", customCache=" + customCache +
-                ", componentsCache=" + componentsCache +
-                ", componentCache=" + componentCache +
+                "id='" + this.id + '\'' +
+                ", name='" + this.name + '\'' +
+                ", ids=" + this.ids +
+                ", authors=" + this.authors +
+                ", data=" + this.data +
+                ", shortDateTime=" + this.shortDateTime +
+                ", fullDateTime=" + this.fullDateTime +
+                ", linesCache=" + this.linesCache +
+                ", lineCache=" + this.lineCache +
+                ", customCache=" + this.customCache +
+                ", componentsCache=" + this.componentsCache +
+                ", componentCache=" + this.componentCache +
                 '}';
     }
 
@@ -156,6 +184,7 @@ public class AdvLanguage extends Language {
      *
      * @param id Target ID
      * @return Language by ID, {@link #ofDefaultAdv()} if {@code id} is null or language not found
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@code AdvLanguage}
      * @see SRBPlatform#language(String)
      * @see #ofDefaultAdv()
      */
@@ -173,7 +202,7 @@ public class AdvLanguage extends Language {
      *
      * @param receiver Target receiver
      * @return Language from receiver, {@link #ofDefaultAdv()} if language not found or receiver not supported
-     * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@code AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
      * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @see SRBPlatform#of(Object)
      * @see #ofIdAdv(String)
@@ -190,7 +219,7 @@ public class AdvLanguage extends Language {
      * Gets the {@link SRBPlatform#defaultLanguage()}.
      *
      * @return Default language
-     * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage}
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@code AdvLanguage}
      * @see SRBPlatform#defaultLanguage()
      */
     @CheckReturnValue
@@ -207,7 +236,7 @@ public class AdvLanguage extends Language {
      * @param id  Target language ID
      * @param key Localization key
      * @return Localized text components, singleton {@code key} text component if not found
-     * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage}
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@code AdvLanguage}
      * @see #ofIdAdv(String)
      * @see #components(String)
      */
@@ -224,7 +253,7 @@ public class AdvLanguage extends Language {
      * @param id  Target language ID
      * @param key Localization key
      * @return Localized text component, {@code key} text component if not found
-     * @throws IllegalArgumentException If the language by that ID is not an instance of {@link AdvLanguage}
+     * @throws IllegalArgumentException If the language by that ID is not an instance of {@code AdvLanguage}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
      * @see #ofIdAdv(String)
      * @see #component(String)
@@ -241,7 +270,7 @@ public class AdvLanguage extends Language {
      * @param receiver Target receiver
      * @param key      Localization key
      * @return Localized text components, singleton {@code key} text component if not found
-     * @throws IllegalArgumentException If the language of that receiver is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
+     * @throws IllegalArgumentException If the language of that receiver is not an instance of {@code AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
      * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @see #ofReceiverAdv(Object)
      * @see #components(String)
@@ -259,7 +288,7 @@ public class AdvLanguage extends Language {
      * @param receiver Target receiver
      * @param key      Localization key
      * @return Localized text component, {@code key} text component if not found
-     * @throws IllegalArgumentException If the language of that receiver is not an instance of {@link AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
+     * @throws IllegalArgumentException If the language of that receiver is not an instance of {@code AdvLanguage} or if receiver is not supported and the platform chose not to return {@code null}
      * @throws NullPointerException     If receiver is {@code null} and the platform chose not to return {@code null}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
      * @see #ofReceiverAdv(Object)
@@ -276,7 +305,7 @@ public class AdvLanguage extends Language {
      *
      * @param key Localization key
      * @return Localized text components, singleton {@code key} text component if not found
-     * @throws IllegalStateException If the default language is not an instance of {@link AdvLanguage}
+     * @throws IllegalStateException If the default language is not an instance of {@code AdvLanguage}
      * @see #ofDefaultAdv()
      * @see #components(String)
      */
@@ -292,7 +321,7 @@ public class AdvLanguage extends Language {
      *
      * @param key Localization key
      * @return Localized text component, {@code key} text component if not found
-     * @throws IllegalStateException If the default language is not an instance of {@link AdvLanguage}
+     * @throws IllegalStateException If the default language is not an instance of {@code AdvLanguage}
      * @apiNote This method will join components with LF ({@code \n}) if multiple are found
      * @see #ofIdAdv(String)
      * @see #component(String)
@@ -307,12 +336,15 @@ public class AdvLanguage extends Language {
      * Recreates the target language as an Adventure language.
      *
      * @param language Target language
-     * @return New adventure language, {@code language} if the language is instance of {@link AdvLanguage}
+     * @return New adventure language, {@code language} if the language is instance of {@code AdvLanguage}
      */
     @CheckReturnValue
     @NotNull
     public static AdvLanguage asAdventure(@NotNull Language language) {
+        // Return as-is if already AdvLanguage.
         if (language instanceof AdvLanguage advLang) return advLang;
+
+        // Create a new adventure language.
         return new AdvLanguage(language.id(), language.name(), language.ids(), language.authors(), language.data(), language.shortDateTime(), language.fullDateTime());
     }
 }

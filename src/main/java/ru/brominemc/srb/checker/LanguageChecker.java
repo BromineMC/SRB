@@ -18,9 +18,9 @@ package ru.brominemc.srb.checker;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import ru.brominemc.srb.Language;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +37,7 @@ public final class LanguageChecker {
      *
      * @throws AssertionError Always
      */
+    @Contract(value = "-> fail", pure = true)
     private LanguageChecker() {
         throw new AssertionError("No instances.");
     }
@@ -50,12 +51,11 @@ public final class LanguageChecker {
      */
     @Contract(pure = true)
     @NotNull
+    @Unmodifiable
     public static List<CheckResult> checkMulti(@NotNull Language base, @NotNull Collection<Language> compares) {
-        List<CheckResult> results = new ArrayList<>(compares.size());
-        for (Language compare : compares) {
-            results.add(checkSingle(base, compare));
-        }
-        return results;
+        return List.copyOf(compares.stream()
+                .map(compare -> checkSingle(base, compare))
+                .toList());
     }
 
     /**
@@ -68,16 +68,22 @@ public final class LanguageChecker {
     @Contract(pure = true)
     @NotNull
     public static CheckResult checkSingle(@NotNull Language base, @NotNull Language compare) {
-        if (base == compare) return CheckResult.forSame(base);
+        // Return for same.
+        if (base == compare) return CheckResult.same(base);
+
+        // Extract the keys.
         Set<String> baseKeys = base.data().keySet();
         Set<String> compareKeys = compare.data().keySet();
 
+        // Extract the extra keys.
         Set<String> extraKeys = new HashSet<>(compareKeys);
         extraKeys.removeAll(baseKeys);
 
+        // Extract the missing keys.
         Set<String> missingKeys = new HashSet<>(baseKeys);
         missingKeys.removeAll(compareKeys);
 
+        // Return the result.
         return new CheckResult(base, compare, extraKeys, missingKeys);
     }
 }

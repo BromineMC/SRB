@@ -59,7 +59,7 @@ public record CheckResult(@NotNull Language base, @NotNull Language compared,
      */
     @Contract(pure = true)
     public boolean clean() {
-        return extraKeys.isEmpty() && missingKeys.isEmpty();
+        return this.extraKeys.isEmpty() && this.missingKeys.isEmpty();
     }
 
     /**
@@ -69,7 +69,7 @@ public record CheckResult(@NotNull Language base, @NotNull Language compared,
      */
     @Contract(pure = true)
     public boolean dirty() {
-        return !extraKeys.isEmpty() || !missingKeys.isEmpty();
+        return !this.extraKeys.isEmpty() || !this.missingKeys.isEmpty();
     }
 
     /**
@@ -77,10 +77,10 @@ public record CheckResult(@NotNull Language base, @NotNull Language compared,
      *
      * @param language Target language
      * @return Clean check result
-     * @apiNote Internal use only. Used when {@link LanguageChecker#checkSingle(Language, Language)} parameters are equal.
+     * @apiNote Internal use only
      */
     @ApiStatus.Internal
-    public static CheckResult forSame(@NotNull Language language) {
+    static CheckResult same(@NotNull Language language) {
         return new CheckResult(language, language, Set.of(), Set.of());
     }
 }

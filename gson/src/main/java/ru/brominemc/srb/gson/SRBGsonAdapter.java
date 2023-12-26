@@ -42,12 +42,17 @@ import java.util.Set;
  */
 public final class SRBGsonAdapter implements JsonDeserializer<Language> {
     @Override
-    public Language deserialize(JsonElement element, Type type, JsonDeserializationContext ctx) throws JsonParseException {
+    public Language deserialize(JsonElement element, Type type, JsonDeserializationContext ctx) {
+        // Require to be JSON.
         if (!(element instanceof JsonObject json)) {
             throw new JsonParseException("Language must be a JSON object: " + element);
         }
+
+        // Extract ID and name.
         String id = getString(json, "id");
         String name = getString(json, "name");
+
+        // Extract the IDs.
         JsonArray array = getArray(json, "ids");
         Set<String> ids = HashSet.newHashSet(array.size());
         for (JsonElement entry : array) {
@@ -59,6 +64,8 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
             }
             ids.add(idsId);
         }
+
+        // Extract the authors.
         array = getArray(json, "authors");
         List<String> authors = new ArrayList<>(array.size());
         for (JsonElement entry : array) {
@@ -70,15 +77,22 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
             }
             authors.add(author);
         }
+
+        // Extract the data.
         JsonObject dataObject = getObject(json, "data");
         Map<String, List<String>> data = HashMap.newHashMap(dataObject.size());
         for (Map.Entry<String, JsonElement> entry : dataObject.entrySet()) {
+            // Extract the entry.
             String key = entry.getKey();
             JsonElement value = entry.getValue();
+
+            // JSON primitive - one line.
             if (value.isJsonPrimitive()) {
                 data.put(key, List.of(value.getAsString()));
                 continue;
             }
+
+            // Array - multiline.
             if (value.isJsonArray()) {
                 array = value.getAsJsonArray();
                 List<String> lines = new ArrayList<>(array.size());
@@ -94,8 +108,12 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
                 data.put(key, lines);
                 continue;
             }
+
+            // Unknown type.
             throw new JsonParseException("Expected to have string or array of string in 'data -> " + key + "', got '" + entry + "' (" + entry.getClass().getName() + "): " + json);
         }
+
+        // Extract the short date-time formatter.
         String rawShortDateTime = getString(json, "shortDateTime");
         DateTimeFormatter shortDateTime;
         try {
@@ -103,6 +121,8 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         } catch (Exception e) {
             throw new JsonParseException("Expected to have valid date-time pattern in 'shortDateTime', got '" + rawShortDateTime + "': " + json, e);
         }
+
+        // Extract the long date-time formatter.
         String rawFullDateTime = getString(json, "fullDateTime");
         DateTimeFormatter fullDateTime;
         try {
@@ -110,9 +130,19 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         } catch (Exception e) {
             throw new JsonParseException("Expected to have valid date-time pattern in 'fullDateTime', got '" + rawFullDateTime + "': " + json, e);
         }
+
+        // Return the language.
         return new Language(id, name, ids, authors, data, shortDateTime, fullDateTime);
     }
 
+    /**
+     * Extracts the string from the JSON.
+     *
+     * @param json Target JSON object
+     * @param key  Target key
+     * @return Extracted string
+     * @throws JsonParseException If unable to extract the string
+     */
     @Contract(pure = true)
     @NotNull
     private static String getString(@NotNull JsonObject json, @NotNull String key) {
@@ -123,6 +153,14 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         }
     }
 
+    /**
+     * Extracts the array from the JSON.
+     *
+     * @param json Target JSON object
+     * @param key  Target key
+     * @return Extracted array
+     * @throws JsonParseException If unable to extract the array
+     */
     @Contract(pure = true)
     @NotNull
     private static JsonArray getArray(@NotNull JsonObject json, @NotNull String key) {
@@ -133,6 +171,14 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         }
     }
 
+    /**
+     * Extracts the object from the JSON.
+     *
+     * @param json Target JSON object
+     * @param key  Target key
+     * @return Extracted object
+     * @throws JsonParseException If unable to extract the object
+     */
     @Contract(pure = true)
     @NotNull
     private static JsonObject getObject(@NotNull JsonObject json, @NotNull String key) {

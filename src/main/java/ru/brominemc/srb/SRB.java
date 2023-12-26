@@ -28,6 +28,9 @@ import java.util.Objects;
  * @author VidTu
  */
 public final class SRB {
+    /**
+     * Current platform.
+     */
     private static SRBPlatform platform;
 
     /**

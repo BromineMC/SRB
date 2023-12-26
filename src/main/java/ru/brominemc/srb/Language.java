@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,19 +41,55 @@ import java.util.stream.Collectors;
  * @author VidTu
  */
 public class Language {
-    // Original data
+    /**
+     * Language ID.
+     */
     protected final String id;
+
+    /**
+     * Language name.
+     */
     protected final String name;
+
+    /**
+     * Unmodifiable language IDs.
+     */
     protected final Set<String> ids;
+
+    /**
+     * Unmodifiable language authors.
+     */
     protected final List<String> authors;
+
+    /**
+     * Unmodifiable language data.
+     */
     protected final Map<String, List<String>> data;
+
+    /**
+     * Language short time format.
+     */
     protected final DateTimeFormatter shortDateTime;
+
+    /**
+     * Language full time format.
+     */
     protected final DateTimeFormatter fullDateTime;
 
-    // Caches
+    /**
+     * Cache for lists of lines.
+     */
     protected final Map<String, List<String>> linesCache;
+
+    /**
+     * Cache for one-lines.
+     */
     protected final Map<String, String> lineCache;
-    protected final Map<Object, Object> customCache = new ConcurrentHashMap<>();
+
+    /**
+     * Cache for custom objects.
+     */
+    protected final Map<Object, Object> customCache;
 
     /**
      * Creates a new language.
@@ -66,44 +101,53 @@ public class Language {
      * @param data          Language keys mapped to lists of lines (lists should not contain null elements or elements with {@code \n} or {@code \r} characters), should be not null
      * @param shortDateTime Short date-time formatter
      * @param fullDateTime  Full (precise) date-time formatter
+     * @throws NullPointerException If any of the objects or entries is {@code null}
      */
     public Language(@NotNull String id, @NotNull String name, @NotNull Set<String> ids,
                     @NotNull List<String> authors, @NotNull Map<String, List<String>> data,
                     @NotNull DateTimeFormatter shortDateTime, @NotNull DateTimeFormatter fullDateTime) {
-        // These are immutable
+        // Copy and intern basic data.
         this.id = id.intern();
         this.name = name.intern();
-        this.shortDateTime = shortDateTime;
-        this.fullDateTime = fullDateTime;
+        this.shortDateTime = Objects.requireNonNull(shortDateTime, "shortDateTime is null");
+        this.fullDateTime = Objects.requireNonNull(fullDateTime, "fullDateTime is null");
 
-        this.ids = ids.stream().map(String::intern).collect(Collectors.toUnmodifiableSet()); // Copy and intern IDs (ensures immutability and null-safety)
-        this.authors = authors.stream().map(String::intern).toList(); // Copy and intern authors (ensures immutability and null-safety)
+        // Copy and intern IDs. (ensures immutability and null-safety)
+        this.ids = Set.copyOf(ids.stream()
+                .map(String::intern)
+                .collect(Collectors.toUnmodifiableSet()));
 
-        // Deep copy data (ensures immutability and null-safety, including that of nested lists)
-        HashMap<String, List<String>> newData = HashMap.newHashMap(data.size());
+        // Copy and intern authors. (ensures immutability and null-safety)
+        this.authors = List.copyOf(authors.stream()
+                .map(String::intern)
+                .toList());
+
+        // Deep copy data. (ensures immutability and null-safety, including that of nested lists)
+        Map<String, List<String>> newData = HashMap.newHashMap(data.size());
+
+        // Iterate over every entry.
         for (Map.Entry<String, List<String>> entry : data.entrySet()) {
+            // Extract the entry.
             String key = entry.getKey();
             List<String> value = entry.getValue();
-            List<String> newValue = new ArrayList<>(value.size());
-            for (String line : value) {
-                int index = line.indexOf('\n');
-                if (index != -1) {
-                    throw new IllegalArgumentException("Line contains LF (\\n): " + line.replace("\n", "\\n").replace("\r", "\\r"));
-                }
-                index = line.indexOf('\r');
-                if (index != -1) {
-                    throw new IllegalArgumentException("Line contains CR (\\r): " + line.replace("\n", "\\n").replace("\r", "\\r"));
-                }
-                newValue.add(line.intern());
-            }
-            newData.put(key, List.copyOf(newValue));
+
+            // Copy the list.
+            value = List.copyOf(value.stream()
+                    .map(String::intern)
+                    .toList());
+
+            // Put the entry back.
+            newData.put(key.intern(), value);
         }
+
+        // Flush the map.
         this.data = Map.copyOf(newData);
 
         // Create caches
         int capacity = (int) Math.ceil(data.size() / 0.75d);
         this.linesCache = new ConcurrentHashMap<>(capacity);
         this.lineCache = new ConcurrentHashMap<>(capacity);
+        this.customCache = new ConcurrentHashMap<>(0);
     }
 
     /**
@@ -114,7 +158,7 @@ public class Language {
     @Contract(pure = true)
     @NotNull
     public final String id() {
-        return id;
+        return this.id;
     }
 
     /**
@@ -125,7 +169,7 @@ public class Language {
     @Contract(pure = true)
     @NotNull
     public String name() {
-        return name;
+        return this.name;
     }
 
     /**
@@ -137,7 +181,7 @@ public class Language {
     @NotNull
     @Unmodifiable
     public final Set<String> ids() {
-        return ids;
+        return this.ids;
     }
 
     /**
@@ -149,7 +193,7 @@ public class Language {
     @NotNull
     @Unmodifiable
     public final List<String> authors() {
-        return authors;
+        return this.authors;
     }
 
     /**
@@ -161,7 +205,7 @@ public class Language {
     @NotNull
     @Unmodifiable
     public final Map<String, List<String>> data() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -172,7 +216,7 @@ public class Language {
     @Contract(pure = true)
     @NotNull
     public final DateTimeFormatter shortDateTime() {
-        return shortDateTime;
+        return this.shortDateTime;
     }
 
     /**
@@ -183,7 +227,7 @@ public class Language {
     @Contract(pure = true)
     @NotNull
     public final DateTimeFormatter fullDateTime() {
-        return fullDateTime;
+        return this.fullDateTime;
     }
 
     /**
@@ -196,11 +240,19 @@ public class Language {
     @NotNull
     @Unmodifiable
     public final List<String> lines(@NotNull String key) {
-        return linesCache.computeIfAbsent(key, k -> {
-            List<String> lines = data.get(key);
+        // Get from cache.
+        return this.linesCache.computeIfAbsent(key, k -> {
+            // Compute cached value.
+            List<String> lines = this.data.get(key);
+
+            // Flush no lines.
             if (lines == null || lines.isEmpty()) {
-                return SRB.platform().missingKey(this, key).stream().map(String::intern).toList();
+                return List.copyOf(SRB.platform().missingKey(this, key).stream()
+                        .map(String::intern)
+                        .toList());
             }
+
+            // Flush to cache.
             return lines;
         });
     }
@@ -216,11 +268,19 @@ public class Language {
     @CheckReturnValue
     @NotNull
     public final String line(@NotNull String key) {
-        return lineCache.computeIfAbsent(key, k -> {
-            List<String> lines = data.get(key);
+        // Get from cache.
+        return this.lineCache.computeIfAbsent(key, k -> {
+            // Compute cached value.
+            List<String> lines = this.data.get(key);
+
+            // Flush no lines.
             if (lines == null || lines.isEmpty()) {
-                return String.join("\n", SRB.platform().missingKey(this, key).stream().map(String::intern).toList()).intern();
+                return String.join("\n", SRB.platform().missingKey(this, key).stream()
+                        .map(String::intern)
+                        .toList()).intern();
             }
+
+            // Flush to cache.
             return String.join("\n", lines).intern();
         });
     }
@@ -234,7 +294,7 @@ public class Language {
     @Contract(value = "_ -> new", pure = true)
     @NotNull
     public final String shortDateTime(@NotNull TemporalAccessor temporal) {
-        return shortDateTime.format(temporal);
+        return this.shortDateTime.format(temporal);
     }
 
     /**
@@ -246,7 +306,7 @@ public class Language {
     @Contract(value = "_ -> new", pure = true)
     @NotNull
     public final String fullDateTime(@NotNull TemporalAccessor temporal) {
-        return fullDateTime.format(temporal);
+        return this.fullDateTime.format(temporal);
     }
 
     /**
@@ -259,28 +319,34 @@ public class Language {
     @CheckReturnValue
     @NotNull
     public String duration(@NotNull Duration duration, boolean precise) {
-        if (duration.isNegative()) return line("unknown");
+        // Return "unknown" for negative duration.
+        if (duration.isNegative()) {
+            return this.line("unknown");
+        }
+
+        // Extract the parts.
         int millis = duration.toMillisPart();
         int seconds = duration.toSecondsPart();
         int minutes = duration.toMinutesPart();
         int hours = duration.toHoursPart();
         long days = duration.toDaysPart();
+
+        // Create the key.
         String key;
         if (days > 0L) {
-            key = "days";
+            key = precise ? "days.precise" : "days";
         } else if (hours > 0) {
-            key = "hours";
+            key = precise ? "hours.precise" : "hours";
         } else if (minutes > 0) {
-            key = "minutes";
+            key = precise ? "minutes.precise" : "minutes";
         } else if (seconds > 0 || !precise) {
-            key = "seconds";
+            key = precise ? "seconds.precise" : "seconds";
         } else {
             key = "millis";
         }
-        if (precise) {
-            key = key.concat(".precise");
-        }
-        return line(key)
+
+        // Get and replace key values.
+        return this.line(key)
                 .replace("%days%", Long.toString(days))
                 .replace("%hours%", Integer.toString(hours))
                 .replace("%minutes%", Integer.toString(minutes))
@@ -295,12 +361,13 @@ public class Language {
      * @param loader Loader for missing value
      * @param <T>    Type of stored value
      * @return Cached value, will be cached from {@code loader} if absent
+     * @throws ClassCastException If the stored value can't be cast to required value
      */
     @CheckReturnValue
     @NotNull
     public <T> T custom(@Nullable Object key, @NotNull Supplier<T> loader) {
         @SuppressWarnings("unchecked")
-        T value = (T) customCache.computeIfAbsent(key, k -> loader.get());
+        T value = (T) this.customCache.computeIfAbsent(key, k -> loader.get());
         return value;
     }
 
@@ -311,40 +378,46 @@ public class Language {
      */
     @OverridingMethodsMustInvokeSuper
     public void preCache() {
-        for (String key : data.keySet()) {
-            List<String> ignoredLines = lines(key);
-            String ignoredLine = line(key);
+        // Iterate over every key.
+        for (String key : this.data.keySet()) {
+            // Get the lines and single lines.
+            List<String> ignoredLines = this.lines(key);
+            String ignoredLine = this.line(key);
         }
     }
 
+    @Contract(value = "null -> false", pure = true)
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (obj == null || this.getClass() != obj.getClass()) return false;
         Language language = (Language) obj;
-        return id.equals(language.id) && name.equals(language.name) && ids.equals(language.ids) &&
-                authors.equals(language.authors) && shortDateTime.equals(language.shortDateTime) &&
-                fullDateTime.equals(language.fullDateTime) && data.equals(language.data);
+        return this.id.equals(language.id) && this.name.equals(language.name) && this.ids.equals(language.ids) &&
+                this.authors.equals(language.authors) && this.shortDateTime.equals(language.shortDateTime) &&
+                this.fullDateTime.equals(language.fullDateTime) && this.data.equals(language.data);
     }
 
+    @Contract(pure = true)
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, ids, authors, data, shortDateTime, fullDateTime);
+        return Objects.hash(this.id, this.name, this.ids, this.authors, this.data, this.shortDateTime, this.fullDateTime);
     }
 
+    @Contract(pure = true)
     @Override
+    @NotNull
     public String toString() {
         return "Language{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", ids=" + ids +
-                ", authors=" + authors +
-                ", data=" + data +
-                ", shortDateTime=" + shortDateTime +
-                ", fullDateTime=" + fullDateTime +
-                ", linesCache=" + linesCache +
-                ", lineCache=" + lineCache +
-                ", customCache=" + customCache +
+                "id='" + this.id + '\'' +
+                ", name='" + this.name + '\'' +
+                ", ids=" + this.ids +
+                ", authors=" + this.authors +
+                ", data=" + this.data +
+                ", shortDateTime=" + this.shortDateTime +
+                ", fullDateTime=" + this.fullDateTime +
+                ", linesCache=" + this.linesCache +
+                ", lineCache=" + this.lineCache +
+                ", customCache=" + this.customCache +
                 '}';
     }
 
@@ -359,8 +432,14 @@ public class Language {
     @CheckReturnValue
     @NotNull
     public static Language ofId(@Nullable String id) {
-        if (id == null) return ofDefault();
-        return Objects.requireNonNullElseGet(SRB.platform().language(id), Language::ofDefault);
+        // Get the platform.
+        SRBPlatform platform = SRB.platform();
+
+        // Return default for null.
+        if (id == null) return platform.defaultLanguage();
+
+        // Return language of ID or default.
+        return Objects.requireNonNullElseGet(platform.language(id), platform::defaultLanguage);
     }
 
     /**
@@ -376,7 +455,11 @@ public class Language {
     @CheckReturnValue
     @NotNull
     public static Language ofReceiver(@Nullable Object receiver) {
-        return Objects.requireNonNullElseGet(SRB.platform().of(receiver), Language::ofDefault);
+        // Get the platform.
+        SRBPlatform platform = SRB.platform();
+
+        // Return language of receiver or default.
+        return Objects.requireNonNullElseGet(platform.of(receiver), platform::defaultLanguage);
     }
 
     /**
@@ -388,6 +471,7 @@ public class Language {
     @CheckReturnValue
     @NotNull
     public static Language ofDefault() {
+        // Return default language.
         return SRB.platform().defaultLanguage();
     }
 

@@ -3,8 +3,10 @@ plugins {
     id("maven-publish")
 }
 
+java.sourceCompatibility = JavaVersion.VERSION_21
+java.targetCompatibility = JavaVersion.VERSION_21
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 group = "ru.brominemc.srb.srb-gson"
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 
 repositories {
     mavenCentral()
