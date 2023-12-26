@@ -1,18 +1,18 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    directory: '/'
     schedule:
       interval: daily
   - package-ecosystem: gradle
-    directory: /
+    directory: '/'
     schedule:
       interval: daily
   - package-ecosystem: gradle
-    directory: /adventure
+    directory: '/adventure'
     schedule:
       interval: daily
   - package-ecosystem: gradle
-    directory: /gson
+    directory: '/gson'
     schedule:
       interval: daily
