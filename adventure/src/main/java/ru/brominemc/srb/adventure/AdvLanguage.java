@@ -18,6 +18,7 @@ package ru.brominemc.srb.adventure;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,7 @@ import ru.brominemc.srb.SRBPlatform;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -59,11 +61,32 @@ public class AdvLanguage extends Language {
      * @param data          Language keys mapped to lists of lines, should be not null
      * @param shortDateTime Short date-time formatter
      * @param fullDateTime  Full (precise) date-time formatter
+     * @deprecated Use {@link #AdvLanguage(String, String, Locale, Set, List, Map, DateTimeFormatter, DateTimeFormatter)}
      */
+    @ApiStatus.ScheduledForRemoval(inVersion = "2.0.0")
+    @Deprecated(since = "1.2.0", forRemoval = true)
     public AdvLanguage(@NotNull String id, @NotNull String name, @NotNull Set<String> ids,
                        @NotNull List<String> authors, @NotNull Map<String, List<String>> data,
                        @NotNull DateTimeFormatter shortDateTime, @NotNull DateTimeFormatter fullDateTime) {
-        super(id, name, ids, authors, data, shortDateTime, fullDateTime);
+        this(id, name, Locale.getDefault(), ids, authors, data, shortDateTime, fullDateTime);
+    }
+
+    /**
+     * Creates a new Adventure language.
+     *
+     * @param id            Language ID, should be non-null and unique
+     * @param name          Language display name, should be non-null
+     * @param locale        Language locale, should be non-null
+     * @param ids           Language identification IDs, should be non-null and should not contain null elements
+     * @param authors       Language authors, should be non-null and should not contain null elements
+     * @param data          Language keys mapped to lists of lines, should be not null
+     * @param shortDateTime Short date-time formatter
+     * @param fullDateTime  Full (precise) date-time formatter
+     */
+    public AdvLanguage(@NotNull String id, @NotNull String name, @NotNull Locale locale, @NotNull Set<String> ids,
+                       @NotNull List<String> authors, @NotNull Map<String, List<String>> data,
+                       @NotNull DateTimeFormatter shortDateTime, @NotNull DateTimeFormatter fullDateTime) {
+        super(id, name, locale, ids, authors, data, shortDateTime, fullDateTime);
 
         // Create caches.
         int capacity = (int) Math.ceil(data.size() / 0.75d);
@@ -148,15 +171,16 @@ public class AdvLanguage extends Language {
         if (this == obj) return true;
         if (obj == null || this.getClass() != obj.getClass()) return false;
         AdvLanguage language = (AdvLanguage) obj;
-        return this.id.equals(language.id) && this.name.equals(language.name) && this.ids.equals(language.ids) &&
-                this.authors.equals(language.authors) && this.shortDateTime.equals(language.shortDateTime) &&
-                this.fullDateTime.equals(language.fullDateTime) && this.data.equals(language.data);
+        return this.id.equals(language.id) && this.name.equals(language.name) && this.locale.equals(language.locale) &&
+                this.ids.equals(language.ids) && this.authors.equals(language.authors) &&
+                this.shortDateTime.equals(language.shortDateTime) && this.fullDateTime.equals(language.fullDateTime) &&
+                this.data.equals(language.data);
     }
 
     @Contract(pure = true)
     @Override
     public int hashCode() {
-        return Objects.hash(this.id, this.name, this.ids, this.authors, this.data, this.shortDateTime, this.fullDateTime, true);
+        return Objects.hash(this.id, this.name, this.locale, this.ids, this.authors, this.data, this.shortDateTime, this.fullDateTime, 0x4E);
     }
 
     @Contract(pure = true)
@@ -166,6 +190,7 @@ public class AdvLanguage extends Language {
         return "AdvLanguage{" +
                 "id='" + this.id + '\'' +
                 ", name='" + this.name + '\'' +
+                ", locale=" + this.locale +
                 ", ids=" + this.ids +
                 ", authors=" + this.authors +
                 ", data=" + this.data +
@@ -345,6 +370,6 @@ public class AdvLanguage extends Language {
         if (language instanceof AdvLanguage advLang) return advLang;
 
         // Create a new adventure language.
-        return new AdvLanguage(language.id(), language.name(), language.ids(), language.authors(), language.data(), language.shortDateTime(), language.fullDateTime());
+        return new AdvLanguage(language.id(), language.name(), language.locale(), language.ids(), language.authors(), language.data(), language.shortDateTime(), language.fullDateTime());
     }
 }

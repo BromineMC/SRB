@@ -18,6 +18,7 @@ package ru.brominemc.srb;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -50,6 +52,11 @@ public class Language {
      * Language name.
      */
     protected final String name;
+
+    /**
+     * Language locale.
+     */
+    protected final Locale locale;
 
     /**
      * Unmodifiable language IDs.
@@ -102,13 +109,36 @@ public class Language {
      * @param shortDateTime Short date-time formatter
      * @param fullDateTime  Full (precise) date-time formatter
      * @throws NullPointerException If any of the objects or entries is {@code null}
+     * @deprecated Use {@link #Language(String, String, Locale, Set, List, Map, DateTimeFormatter, DateTimeFormatter)}
      */
+    @ApiStatus.ScheduledForRemoval(inVersion = "2.0.0")
+    @Deprecated(since = "1.2.0", forRemoval = true)
     public Language(@NotNull String id, @NotNull String name, @NotNull Set<String> ids,
+                    @NotNull List<String> authors, @NotNull Map<String, List<String>> data,
+                    @NotNull DateTimeFormatter shortDateTime, @NotNull DateTimeFormatter fullDateTime) {
+        this(id, name, Locale.getDefault(), ids, authors, data, shortDateTime, fullDateTime);
+    }
+
+    /**
+     * Creates a new language.
+     *
+     * @param id            Language ID, should be non-null and unique
+     * @param name          Language display name, should be non-null
+     * @param ids           Language identification IDs, should be non-null and should not contain null elements
+     * @param locale        Language locale, should be non-null
+     * @param authors       Language authors, should be non-null and should not contain null elements
+     * @param data          Language keys mapped to lists of lines (lists should not contain null elements or elements with {@code \n} or {@code \r} characters), should be not null
+     * @param shortDateTime Short date-time formatter
+     * @param fullDateTime  Full (precise) date-time formatter
+     * @throws NullPointerException If any of the objects or entries is {@code null}
+     */
+    public Language(@NotNull String id, @NotNull String name, @NotNull Locale locale, @NotNull Set<String> ids,
                     @NotNull List<String> authors, @NotNull Map<String, List<String>> data,
                     @NotNull DateTimeFormatter shortDateTime, @NotNull DateTimeFormatter fullDateTime) {
         // Copy and intern basic data.
         this.id = id.intern();
         this.name = name.intern();
+        this.locale = Objects.requireNonNull(locale, "locale is null");
         this.shortDateTime = Objects.requireNonNull(shortDateTime, "shortDateTime is null");
         this.fullDateTime = Objects.requireNonNull(fullDateTime, "fullDateTime is null");
 
@@ -170,6 +200,17 @@ public class Language {
     @NotNull
     public String name() {
         return this.name;
+    }
+
+    /**
+     * Gets the language locale.
+     *
+     * @return Language locale
+     */
+    @Contract(pure = true)
+    @NotNull
+    public final Locale locale() {
+        return this.locale;
     }
 
     /**
@@ -391,16 +432,17 @@ public class Language {
     public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         if (obj == null || this.getClass() != obj.getClass()) return false;
-        Language language = (Language) obj;
-        return this.id.equals(language.id) && this.name.equals(language.name) && this.ids.equals(language.ids) &&
-                this.authors.equals(language.authors) && this.shortDateTime.equals(language.shortDateTime) &&
-                this.fullDateTime.equals(language.fullDateTime) && this.data.equals(language.data);
+        Language that = (Language) obj;
+        return this.id.equals(that.id) && this.name.equals(that.name) && this.locale.equals(that.locale) &&
+                this.ids.equals(that.ids) && this.authors.equals(that.authors) &&
+                this.shortDateTime.equals(that.shortDateTime) && this.fullDateTime.equals(that.fullDateTime) &&
+                this.data.equals(that.data);
     }
 
     @Contract(pure = true)
     @Override
     public int hashCode() {
-        return Objects.hash(this.id, this.name, this.ids, this.authors, this.data, this.shortDateTime, this.fullDateTime);
+        return Objects.hash(this.id, this.name, this.locale, this.ids, this.authors, this.data, this.shortDateTime, this.fullDateTime);
     }
 
     @Contract(pure = true)
@@ -410,6 +452,7 @@ public class Language {
         return "Language{" +
                 "id='" + this.id + '\'' +
                 ", name='" + this.name + '\'' +
+                ", locale=" + this.locale +
                 ", ids=" + this.ids +
                 ", authors=" + this.authors +
                 ", data=" + this.data +

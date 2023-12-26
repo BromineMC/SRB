@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +52,16 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         // Extract ID and name.
         String id = getString(json, "id");
         String name = getString(json, "name");
+
+        // Extract the locale, if any.
+        // TODO(threefusii): Make mandatory in 2.0.0.
+        Locale locale;
+        if (json.has("locale")) {
+            String rawLocale = getString(json, "locale");
+            locale = Locale.forLanguageTag(rawLocale);
+        } else {
+            locale = Locale.getDefault();
+        }
 
         // Extract the IDs.
         JsonArray array = getArray(json, "ids");
@@ -117,7 +128,7 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         String rawShortDateTime = getString(json, "shortDateTime");
         DateTimeFormatter shortDateTime;
         try {
-            shortDateTime = DateTimeFormatter.ofPattern(rawShortDateTime);
+            shortDateTime = DateTimeFormatter.ofPattern(rawShortDateTime, locale);
         } catch (Exception e) {
             throw new JsonParseException("Expected to have valid date-time pattern in 'shortDateTime', got '" + rawShortDateTime + "': " + json, e);
         }
@@ -126,13 +137,13 @@ public final class SRBGsonAdapter implements JsonDeserializer<Language> {
         String rawFullDateTime = getString(json, "fullDateTime");
         DateTimeFormatter fullDateTime;
         try {
-            fullDateTime = DateTimeFormatter.ofPattern(rawFullDateTime);
+            fullDateTime = DateTimeFormatter.ofPattern(rawFullDateTime, locale);
         } catch (Exception e) {
             throw new JsonParseException("Expected to have valid date-time pattern in 'fullDateTime', got '" + rawFullDateTime + "': " + json, e);
         }
 
         // Return the language.
-        return new Language(id, name, ids, authors, data, shortDateTime, fullDateTime);
+        return new Language(id, name, locale, ids, authors, data, shortDateTime, fullDateTime);
     }
 
     /**
