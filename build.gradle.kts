@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compileOnlyApi("org.jetbrains:annotations:24.1.0")
-    compileOnlyApi("com.google.errorprone:error_prone_annotations:2.24.0")
+    compileOnlyApi("com.google.errorprone:error_prone_annotations:2.24.1")
 }
 
 tasks.withType<JavaCompile> {
