@@ -32,6 +32,7 @@ import java.util.Set;
  * @param extraKeys   An unmodifiable set of extra language keys
  * @param missingKeys An unmodifiable set of missing language keys
  * @author VidTu
+ * @author threefusii
  */
 public record CheckResult(@NotNull Language base, @NotNull Language compared,
                           @NotNull @Unmodifiable Set<String> extraKeys,

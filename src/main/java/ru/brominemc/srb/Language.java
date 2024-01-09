@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
  * Language instance.
  *
  * @author VidTu
+ * @author threefusii
  */
 public class Language {
     /**

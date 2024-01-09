@@ -26,6 +26,7 @@ import java.util.Objects;
  * SRB is the localization/translation library for BromineMC.
  *
  * @author VidTu
+ * @author threefusii
  */
 public final class SRB {
     /**

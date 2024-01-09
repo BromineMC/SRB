@@ -40,6 +40,7 @@ import java.util.Set;
  * Gson adapter (deserializer) for {@link Language}.
  *
  * @author VidTu
+ * @author threefusii
  */
 public final class SRBGsonAdapter implements JsonDeserializer<Language> {
     /**

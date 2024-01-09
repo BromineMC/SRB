@@ -30,6 +30,7 @@ import java.util.Set;
  * Checker for language differences.
  *
  * @author VidTu
+ * @author threefusii
  */
 public final class LanguageChecker {
     /**

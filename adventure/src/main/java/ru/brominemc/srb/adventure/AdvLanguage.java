@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Language instance with support for Kyori Adventure API.
  *
  * @author VidTu
+ * @author threefusii
  */
 public class AdvLanguage extends Language {
     /**
