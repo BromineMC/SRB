@@ -37,11 +37,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * GSON adapter (deserializer) for {@link Language}.
+ * Gson adapter (deserializer) for {@link Language}.
  *
  * @author VidTu
  */
 public final class SRBGsonAdapter implements JsonDeserializer<Language> {
+    /**
+     * Creates a new adapter.
+     */
+    public SRBGsonAdapter() {
+        // Empty
+    }
+
     @Override
     public Language deserialize(JsonElement element, Type type, JsonDeserializationContext ctx) {
         // Require to be JSON.

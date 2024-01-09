@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 /**
- * SRB (Speak Russian Bl**t) is the localization/translation library for BromineMC.
+ * SRB is the localization/translation library for BromineMC.
  *
  * @author VidTu
  */
